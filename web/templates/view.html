@@ -1,0 +1,36 @@
+{{define "view"}}
+{{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+{{if .Message}}<p class="note">{{.Message}}</p>{{end}}
+{{if .Clusters}}
+<p class="stats">Величин: <b>{{.Count}}</b> · α = <b>{{.Alpha}}</b> · кластеров: <b>{{len .Clusters}}</b></p>
+<div class="charts">
+  <figure><figcaption>Срезы величин при α, по кластерам</figcaption>{{template "chart" .Cuts}}</figure>
+  <figure><figcaption>Плоскость (нижняя, верхняя граница среза)</figcaption>{{template "chart" .Plane}}</figure>
+</div>
+<table>
+  <thead><tr><th>Кластер</th><th>Величин</th><th>Медоид</th></tr></thead>
+  <tbody>
+  {{range .Clusters}}<tr><td><i class="swatch k{{.Class}}"></i>{{.Num}}</td><td>{{.Size}}</td><td>{{.Medoid}}</td></tr>
+  {{end}}
+  </tbody>
+</table>
+{{end}}
+{{end}}
+
+{{define "nav"}}<header>
+  <a href="/"{{if eq . "index"}} class="on"{{end}}>Кластеризация нечётких величин</a>
+  <a href="/ops"{{if eq . "ops"}} class="on"{{end}}>Операции над нечёткими величинами</a>
+</header>{{end}}
+
+{{define "chart"}}<svg viewBox="0 0 {{.W}} {{.H}}" role="img">
+  {{range .XTicks}}<line class="grid" x1="{{f .Pos}}" x2="{{f .Pos}}" y1="{{f $.Top}}" y2="{{f $.Base}}"/>
+  <text class="tick" x="{{f .Pos}}" y="{{f $.Base}}" dy="16" text-anchor="middle">{{.Label}}</text>{{end}}
+  {{range .YTicks}}<line class="grid" x1="{{f $.Left}}" x2="{{f $.End}}" y1="{{f .Pos}}" y2="{{f .Pos}}"/>
+  <text class="tick" x="{{f $.Left}}" y="{{f .Pos}}" dx="-6" dy="4" text-anchor="end">{{.Label}}</text>{{end}}
+  {{if .Diag}}<line class="diag" x1="{{f .Left}}" y1="{{f .Base}}" x2="{{f .End}}" y2="{{f .Top}}"/>{{end}}
+  {{range .Polys}}<polygon class="poly k{{.Class}}" points="{{.Points}}"><title>{{.Name}}</title></polygon>{{end}}
+  {{range .Bars}}<rect id="{{.ID}}" class="bar k{{.Class}}" x="{{f .X}}" y="{{f .Y}}" width="{{f .W}}" height="{{f .H}}"><title>{{.Tip}}</title></rect>{{end}}
+  {{range .Dots}}<circle id="{{.ID}}" class="dot k{{.Class}}{{if .Medoid}} medoid{{end}}" cx="{{f .X}}" cy="{{f .Y}}" r="{{if .Medoid}}7{{else}}3.5{{end}}"><title>{{.Tip}}</title></circle>{{end}}
+  <text class="axis" x="{{f .End}}" y="{{f .Base}}" dy="30" text-anchor="end">{{.XLabel}}</text>
+  {{if .YLabel}}<text class="axis" x="{{f .Left}}" y="{{f .Top}}" dx="4" dy="10">{{.YLabel}}</text>{{end}}
+</svg>{{end}}

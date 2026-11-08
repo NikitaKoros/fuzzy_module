@@ -1,0 +1,69 @@
+{{define "index"}}<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кластеризация нечётких величин</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/htmx.min.js"></script>
+</head>
+<body hx-target="#view">
+{{template "nav" "index"}}
+<main>
+<aside>
+  <form id="ctl" hx-get="/view" hx-trigger="input delay:150ms" hx-sync="this:replace">
+    <h2>Просмотр</h2>
+    <label>Уровень α
+      <span class="pair">
+        <input type="range" name="alpha" min="0" max="1" step="0.01" value="{{.Ctl.Alpha}}"
+               oninput="this.nextElementSibling.value=this.value">
+        <input type="number" min="0" max="1" step="0.01" value="{{.Ctl.Alpha}}"
+               oninput="this.previousElementSibling.value=this.value">
+      </span>
+    </label>
+    <label>Алгоритм
+      <select name="algo">
+        <option value="pam"{{if eq .Ctl.Algo "pam"}} selected{{end}}>k-медоидов (PAM)</option>
+        <option value="agglo"{{if eq .Ctl.Algo "agglo"}} selected{{end}}>Иерархический, порог</option>
+      </select>
+    </label>
+    <label>Число кластеров k <input type="number" name="k" min="1" value="{{.Ctl.K}}"></label>
+    <label>Порог расстояния <input type="number" name="threshold" min="0" step="0.5" value="{{.Ctl.Threshold}}"></label>
+  </form>
+
+  <form id="gen" hx-post="/generate" hx-include="#ctl" hx-trigger="submit">
+    <h2>Генерация</h2>
+    <label>Режим
+      <select name="mode">
+        <option value="clouds"{{if eq .Gen.Mode "clouds"}} selected{{end}}>Облака вокруг центров</option>
+        <option value="uniform"{{if eq .Gen.Mode "uniform"}} selected{{end}}>Равномерно</option>
+      </select>
+    </label>
+    <label>Число величин <input type="number" name="n" min="1" max="300" value="{{.Gen.N}}"></label>
+    <label>Облаков <input type="number" name="groups" min="1" value="{{.Gen.Groups}}"></label>
+    <label>Шум (доля диапазона) <input type="number" name="noise" min="0" step="0.01" value="{{.Gen.Noise}}"></label>
+    <div class="row">
+      <label>a от <input type="number" name="alo" step="any" value="{{.Gen.ALo}}"></label>
+      <label>до <input type="number" name="ahi" step="any" value="{{.Gen.AHi}}"></label>
+    </div>
+    <div class="row">
+      <label>ширина от <input type="number" name="wlo" step="any" min="0.01" value="{{.Gen.WLo}}"></label>
+      <label>до <input type="number" name="whi" step="any" value="{{.Gen.WHi}}"></label>
+    </div>
+    <label>Seed <input type="number" name="seed" value="{{.Gen.Seed}}"></label>
+    <button type="submit">Сгенерировать</button>
+  </form>
+
+  <form id="files">
+    <h2>Файл</h2>
+    <label>Имя файла (загрузка из data/input, сохранение в data) <input type="text" name="file" value="{{.File}}"></label>
+    <div class="row">
+      <button type="button" hx-post="/save" hx-include="#ctl">Сохранить</button>
+      <button type="button" hx-post="/load" hx-include="#ctl">Загрузить</button>
+    </div>
+  </form>
+</aside>
+<section id="view">{{template "view" .View}}</section>
+</main>
+</body>
+</html>{{end}}

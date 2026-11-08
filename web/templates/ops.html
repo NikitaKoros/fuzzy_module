@@ -1,0 +1,50 @@
+{{define "ops"}}<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Операции над нечёткими величинами</title>
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/htmx.min.js"></script>
+</head>
+<body hx-target="#opsview">
+{{template "nav" "ops"}}
+<main>
+<aside>
+  <form hx-get="/ops/calc" hx-trigger="input delay:200ms" hx-sync="this:replace">
+    <h2>Величины</h2>
+    <div class="row">
+      <label>A: a <input type="number" name="a1" step="any" value="{{.Form.A1}}"></label>
+      <label>b <input type="number" name="b1" step="any" value="{{.Form.B1}}"></label>
+    </div>
+    <div class="row">
+      <label>B: a <input type="number" name="a2" step="any" value="{{.Form.A2}}"></label>
+      <label>b <input type="number" name="b2" step="any" value="{{.Form.B2}}"></label>
+    </div>
+    <label>Операция
+      <select name="op">
+        {{range .Ops}}<option value="{{.Key}}"{{if eq .Key $.Form.Op}} selected{{end}}>{{.Sym}} {{.Label}}</option>
+        {{end}}
+      </select>
+    </label>
+  </form>
+</aside>
+<section id="opsview">{{template "opsview" .View}}</section>
+</main>
+</body>
+</html>{{end}}
+
+{{define "opsview"}}
+{{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+{{if .Ready}}
+<figure><figcaption>Функции принадлежности μ(x)</figcaption>{{template "chart" .Chart}}</figure>
+<table>
+  <thead><tr><th>Величина</th><th>Носитель</th></tr></thead>
+  <tbody>
+  {{range .Legend}}<tr><td><i class="swatch k{{.Class}}"></i>{{.Name}}</td><td>{{.Span}}</td></tr>
+  {{end}}
+  </tbody>
+</table>
+<p class="stats">Сравнение A и B: возможность Pos(A ≥ B) = <b>{{printf "%.3f" .Pos}}</b>, необходимость Nec(A ≥ B) = <b>{{printf "%.3f" .Nec}}</b></p>
+{{end}}
+{{end}}
